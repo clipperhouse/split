@@ -1,6 +1,6 @@
 package split
 
-import "bytes"
+import "strings"
 
 // This Go implementation started with C# SpanSplitEnumerator<T>: https://github.com/dotnet/runtime/pull/104534
 
@@ -8,54 +8,44 @@ import "bytes"
 // The .NET Foundation licenses this file to you under the MIT license.
 // https://github.com/dotnet/runtime/blob/main/LICENSE.TXT
 
-type mode int
-
-const (
-	none mode = iota
-	singleElement
-	any
-	sequence
-	emptySequence
-)
-
-func OnByte(input []byte, separator byte) *Enumerator {
-	return &Enumerator{
+func StringOnByte(input string, separator byte) *StringIterator {
+	return &StringIterator{
 		input:     input,
 		separator: separator,
 		mode:      singleElement,
 	}
 }
 
-func OnAnyByte(input []byte, separators []byte) *Enumerator {
-	return &Enumerator{
+func String(input string, separator string) *StringIterator {
+	return &StringIterator{
 		input:      input,
-		separators: separators,
-		mode:       any,
-	}
-}
-
-func OnByteSequence(input []byte, separators []byte) *Enumerator {
-	return &Enumerator{
-		input:      input,
-		separators: separators,
+		separators: separator,
 		mode:       sequence,
 	}
 }
 
-type Enumerator struct {
-	input      []byte
+func StringOnAnyChar(input string, chars string) *StringIterator {
+	return &StringIterator{
+		input:      input,
+		separators: chars,
+		mode:       any,
+	}
+}
+
+type StringIterator struct {
+	input      string
 	separator  byte
-	separators []byte
+	separators string
 	mode       mode
 	start, end int
 	cursor     int
 }
 
-func (en *Enumerator) Value() []byte {
+func (en *StringIterator) Value() string {
 	return en.input[en.start:en.end]
 }
 
-func (en *Enumerator) Next() bool {
+func (en *StringIterator) Next() bool {
 	var index int
 	var separatorLength = 1
 	var slice = en.input[en.cursor:]
@@ -65,11 +55,11 @@ func (en *Enumerator) Next() bool {
 		return false
 
 	case singleElement:
-		index = bytes.IndexByte(slice, en.separator)
+		index = strings.IndexByte(slice, en.separator)
 	case any:
-		index = bytes.IndexAny(slice, string(en.separators))
+		index = strings.IndexAny(slice, en.separators)
 	case sequence:
-		index = bytes.Index(slice, en.separators)
+		index = strings.Index(slice, en.separators)
 		separatorLength = len(en.separators)
 	case emptySequence:
 		index = -1
