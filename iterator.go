@@ -1,10 +1,5 @@
 package split
 
-import (
-	"bytes"
-	"unicode/utf8"
-)
-
 type ByteSeq interface {
 	~string | ~[]byte
 }
@@ -14,13 +9,6 @@ type funcs[T ByteSeq] struct {
 	IndexByte  func(s T, c byte) int
 	IndexAny   func(s T, chars string) int
 	DecodeRune func(p T) (r rune, size int)
-}
-
-var byteFuncs = funcs[[]byte]{
-	Index:      bytes.Index,
-	IndexByte:  bytes.IndexByte,
-	IndexAny:   bytes.IndexAny,
-	DecodeRune: utf8.DecodeRune,
 }
 
 func split[T ByteSeq](s T, sep T, funcs funcs[T]) *iterator[T] {

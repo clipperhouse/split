@@ -1,5 +1,10 @@
 package split
 
+import (
+	"bytes"
+	"unicode/utf8"
+)
+
 // This Go implementation started with C# SpanSplitEnumerator<T>: https://github.com/dotnet/runtime/pull/104534
 
 // Licensed to the .NET Foundation under one or more agreements.
@@ -7,6 +12,13 @@ package split
 // https://github.com/dotnet/runtime/blob/main/LICENSE.TXT
 
 type ByteIterator = iterator[[]byte]
+
+var byteFuncs = funcs[[]byte]{
+	Index:      bytes.Index,
+	IndexByte:  bytes.IndexByte,
+	IndexAny:   bytes.IndexAny,
+	DecodeRune: utf8.DecodeRune,
+}
 
 // Bytes splits s into subslices separated by sep and
 // returns an iterator of the subslices between those separators.
