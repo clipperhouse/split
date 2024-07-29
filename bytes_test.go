@@ -39,24 +39,6 @@ func BenchmarkBytesSplit(b *testing.B) {
 	}
 }
 
-func TestBytesOnByte(t *testing.T) {
-	var got [][]byte
-
-	var sep byte = ' '
-
-	input := []byte("Hello how are you ")
-	split := split.BytesOnByte(input, sep)
-	for split.Next() {
-		got = append(got, split.Value())
-	}
-
-	expected := bytes.Split(input, []byte{sep})
-
-	if !reflect.DeepEqual(got, expected) {
-		t.Fatalf("\nexpected: %v,\ngot:      %v", expected, got)
-	}
-}
-
 func TestBytesEmpty(t *testing.T) {
 	sep := []byte{}
 
@@ -97,7 +79,7 @@ func TestBytesOnAny(t *testing.T) {
 	seps := []byte(", ")
 
 	input := []byte("Hello, how a,re, you ")
-	split := split.BytesOnAny(input, seps)
+	split := split.BytesAny(input, seps)
 
 	var got [][]byte
 	for split.Next() {

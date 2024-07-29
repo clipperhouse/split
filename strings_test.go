@@ -103,24 +103,6 @@ func TestSplit(t *testing.T) {
 	}
 }
 
-func TestStringOnByte(t *testing.T) {
-	var got []string
-
-	var sep byte = ' '
-
-	input := "Hello how are you "
-	split := split.StringOnByte(input, sep)
-	for split.Next() {
-		got = append(got, split.Value())
-	}
-
-	expected := strings.Split(input, string(sep))
-
-	if !reflect.DeepEqual(got, expected) {
-		t.Fatalf("\nexpected: %v,\ngot:      %v", expected, got)
-	}
-}
-
 func TestString(t *testing.T) {
 	var sep = ", "
 
@@ -143,7 +125,7 @@ func TestStringOnAnyChar(t *testing.T) {
 	var sep = ", "
 
 	input := "Hello, how a,re, you "
-	split := split.StringOnAnyChar(input, sep)
+	split := split.StringAny(input, sep)
 
 	var got []string
 	for split.Next() {

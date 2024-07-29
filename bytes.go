@@ -14,43 +14,14 @@ type ByteIterator = iterator[[]byte]
 //
 // Use `for iterator.Next()` to loop, and `iterator.Value()` to get the subslices.
 func Bytes(s []byte, sep []byte) *ByteIterator {
-	var mode = sequence
-	if len(s) == 0 || len(sep) == 0 {
-		mode = emptySequence
-	}
-
-	return &ByteIterator{
-		funcs:      byteFuncs,
-		input:      s,
-		separators: sep,
-		mode:       mode,
-	}
+	return split(s, sep, byteFuncs)
 }
 
-func BytesOnByte(s []byte, separator byte) *ByteIterator {
-	return &ByteIterator{
-		funcs:     byteFuncs,
-		input:     s,
-		separator: separator,
-		mode:      singleElement,
-	}
-}
-
-// BytesOnAny splits s into subslices separated by any of the bytes found in sep
+// BytesAny splits s into subslices separated by any of the bytes found in sep
 // and returns an iterator of the subslices between those separators.
-// If sep is empty, BytesOnAny splits after each UTF-8 sequence (rune).
+// If sep is empty, BytesAny splits after each UTF-8 sequence (rune).
 //
 // Use `for ByteIterator.Next()` to loop, and `ByteIterator.Value()` to get the subslices.
-func BytesOnAny(s []byte, separators []byte) *ByteIterator {
-	var mode = any
-	if len(s) == 0 || len(separators) == 0 {
-		mode = emptySequence
-	}
-
-	return &ByteIterator{
-		funcs:      byteFuncs,
-		input:      s,
-		separators: separators,
-		mode:       mode,
-	}
+func BytesAny(s []byte, separators []byte) *ByteIterator {
+	return splitAny(s, separators, byteFuncs)
 }

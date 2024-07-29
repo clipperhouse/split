@@ -2,7 +2,6 @@ package split
 
 import (
 	"bytes"
-	"strings"
 	"unicode/utf8"
 )
 
@@ -12,16 +11,9 @@ type ByteSeq interface {
 
 type funcs[T ByteSeq] struct {
 	Index      func(s T, sep T) int
-	IndexByte  func(b T, c byte) int
+	IndexByte  func(s T, c byte) int
 	IndexAny   func(s T, chars string) int
 	DecodeRune func(p T) (r rune, size int)
-}
-
-var stringFuncs = funcs[string]{
-	Index:      strings.Index,
-	IndexByte:  strings.IndexByte,
-	IndexAny:   strings.IndexAny,
-	DecodeRune: utf8.DecodeRuneInString,
 }
 
 var byteFuncs = funcs[[]byte]{
@@ -31,8 +23,41 @@ var byteFuncs = funcs[[]byte]{
 	DecodeRune: utf8.DecodeRune,
 }
 
+func split[T ByteSeq](s T, sep T, funcs funcs[T]) *iterator[T] {
+	var mode = sequence
+	if len(s) == 0 {
+		mode = done
+	} else if len(sep) == 0 {
+		mode = emptySequence
+	}
+
+	return &iterator[T]{
+		funcs:      funcs,
+		input:      s,
+		separators: sep,
+		mode:       mode,
+	}
+}
+
+func splitAny[T ByteSeq](s T, separators T, funcs funcs[T]) *iterator[T] {
+	var mode = any
+	if len(s) == 0 {
+		mode = done
+	} else if len(separators) == 0 {
+		mode = emptySequence
+	}
+
+	return &iterator[T]{
+		funcs:      funcs,
+		input:      s,
+		separators: separators,
+		mode:       mode,
+	}
+
+}
+
 type iterator[T ByteSeq] struct {
-	funcs      funcs[T]
+	funcs[T]
 	input      T
 	separator  byte
 	separators T
@@ -51,17 +76,17 @@ func (it *iterator[T]) Next() bool {
 	var slice = it.input[it.cursor:]
 
 	switch it.mode {
-	case none:
+	case done:
 		return false
 	case singleElement:
-		index = it.funcs.IndexByte(slice, it.separator)
+		index = it.IndexByte(slice, it.separator)
 	case any:
-		index = it.funcs.IndexAny(slice, string(it.separators))
+		index = it.IndexAny(slice, string(it.separators))
 	case sequence:
-		index = it.funcs.Index(slice, it.separators)
+		index = it.Index(slice, it.separators)
 		separatorLength = len(it.separators)
 	case emptySequence:
-		_, index = it.funcs.DecodeRune(slice)
+		_, index = it.DecodeRune(slice)
 		if index == 0 {
 			return false
 		}
@@ -76,7 +101,7 @@ func (it *iterator[T]) Next() bool {
 	} else {
 		it.cursor = len(it.input)
 		it.end = len(it.input)
-		it.mode = none
+		it.mode = done
 	}
 
 	return true

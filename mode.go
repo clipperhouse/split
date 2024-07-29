@@ -3,7 +3,7 @@ package split
 type mode int
 
 const (
-	none mode = iota
+	done mode = iota
 	singleElement
 	any
 	sequence
