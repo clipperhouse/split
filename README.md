@@ -1,16 +1,16 @@
-A more efficient splitter for bytes and strings, with a focus on zero allocation, for Go.
+A more efficient splitter for bytes and strings, with a focus on zero allocation, for Go. Use this where you would might use `bytes.Split` or `strings.Split`.
 
-Use this where you would might use `bytes.Split` or `strings.Split`.
+You might be interested if you are splitting strings or bytes on a hot path.
 
-```
+### Usage
+
+```bash
 go get https://github.com/clipperhouse/split
 ```
 
 ```go
 import "github.com/clipperhouse/split"
-```
 
-```go
 text := "Hello, 世界. Nice dog! 👍🐶"
 sep := " "
 
@@ -36,7 +36,7 @@ Some initial benchmarks:
 1267 ns/op	    378.07 MB/s	    1280 B/op	       1 allocs/op
 ```
 
-Overall, this package is a bit faster, but perhaps more importantly, notice the difference in allocations. `strings.Split` seems to have some sort of multiplying effect, as this benchmark uses a 400B string.
+Overall, this package is a bit faster, but perhaps more importantly, notice the difference in allocations. If you're on a hot path, reducing GC might add up and make you a "better neighbor".
 
 ### Testing
 
