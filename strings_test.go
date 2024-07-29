@@ -25,6 +25,20 @@ func BenchmarkSplitString(b *testing.B) {
 	}
 }
 
+func BenchmarkSplitStringToArray(b *testing.B) {
+	sep := " "
+
+	b.SetBytes(int64(len(bench)))
+
+	for i := 0; i < b.N; i++ {
+		split := split.String(bench, sep).ToArray()
+
+		for _, v := range split {
+			io.WriteString(io.Discard, v)
+		}
+	}
+}
+
 func BenchmarkStringsSplit(b *testing.B) {
 	sep := " "
 

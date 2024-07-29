@@ -91,8 +91,12 @@ func (it *iterator[T]) Next() bool {
 	return true
 }
 
+// ToArray collects all the subslices into an array.
+//
+// This is a convenience method, and the result should identical to strings|bytes.Split from the standard library.
+// You should just use strings|bytes.Split if your goal is an array of results.
 func (it *iterator[T]) ToArray() []T {
-	var result []T = make([]T, 0)
+	var result []T = make([]T, 0, len(it.input)/4)
 
 	for it.Next() {
 		result = append(result, it.Value())
