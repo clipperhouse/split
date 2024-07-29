@@ -26,13 +26,13 @@ Some initial benchmarks:
 `split.String` (this package)
 
 ```
-BenchmarkSplitString-8   	 1020759	      1185 ns/op	 404.28 MB/s	       0 B/op	       0 allocs/op
+1185 ns/op	    404.28 MB/s	       0 B/op	       0 allocs/op
 ```
 
 `strings.Split` (standard library)
 
 ```
-BenchmarkStringsSplit-8   	  917026	      1267 ns/op	 378.07 MB/s	    1280 B/op	       1 allocs/op
+1267 ns/op	    378.07 MB/s	    1280 B/op	       1 allocs/op
 ```
 
 Not ready for production yet! More testing and API consideration to come.
