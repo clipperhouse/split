@@ -13,9 +13,7 @@ type funcs[T ByteSeq] struct {
 
 func split[T ByteSeq](s T, sep T, funcs funcs[T]) *iterator[T] {
 	var mode = sequence
-	if len(s) == 0 {
-		mode = done
-	} else if len(sep) == 0 {
+	if len(sep) == 0 {
 		mode = emptySequence
 	}
 
@@ -29,9 +27,7 @@ func split[T ByteSeq](s T, sep T, funcs funcs[T]) *iterator[T] {
 
 func splitAny[T ByteSeq](s T, separators T, funcs funcs[T]) *iterator[T] {
 	var mode = any
-	if len(s) == 0 {
-		mode = done
-	} else if len(separators) == 0 {
+	if len(separators) == 0 {
 		mode = emptySequence
 	}
 
@@ -96,7 +92,7 @@ func (it *iterator[T]) Next() bool {
 }
 
 func (it *iterator[T]) ToArray() []T {
-	var result []T
+	var result []T = make([]T, 0)
 
 	for it.Next() {
 		result = append(result, it.Value())

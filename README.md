@@ -20,6 +20,7 @@ for split.Next() {
     fmt.Println(split.Value())
 }
 ```
+### Performance
 
 Some initial benchmarks:
 
@@ -34,6 +35,16 @@ Some initial benchmarks:
 ```
 1267 ns/op	    378.07 MB/s	    1280 B/op	       1 allocs/op
 ```
+
+Overall, this package is a bit faster, but perhaps more importantly, notice the difference in allocations. `strings.Split` seems to have some sort of multiplying effect, as this benchmark uses a 400B string.
+
+### Testing
+
+We work to ensure that `split.Bytes` and `split.String` offer an identical API and results as their standard library counterparts, `bytes.Split` and `strings.Split`. Have a look at the tests to verify that this is true.
+
+[![Test](https://github.com/clipperhouse/split/actions/workflows/gotest.yml/badge.svg)](https://github.com/clipperhouse/split/actions/workflows/gotest.yml)
+
+### Status
 
 Not ready for production yet! More testing and API consideration to come.
 

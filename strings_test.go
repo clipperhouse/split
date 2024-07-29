@@ -38,90 +38,19 @@ func BenchmarkStringsSplit(b *testing.B) {
 	}
 }
 
-type SplitTest struct {
-	s   string
-	sep string
-	n   int
-	a   []string
-}
-
-var abcd = "abcd"
-var faces = "☺☻☹"
-var commas = "1,2,3,4"
-var dots = "1....2....3....4"
-
-var splittests = []SplitTest{
-	{"", "a", -1, []string{}},
-	{"", "", -1, []string{}},
-	// {abcd, "", 2, []string{"a", "bcd"}},
-	// {abcd, "", 4, []string{"a", "b", "c", "d"}},
-	{abcd, "", -1, []string{"a", "b", "c", "d"}},
-	{faces, "", -1, []string{"☺", "☻", "☹"}},
-	// {faces, "", 3, []string{"☺", "☻", "☹"}},
-	// {faces, "", 17, []string{"☺", "☻", "☹"}},
-	{"☺�☹", "", -1, []string{"☺", "�", "☹"}},
-	// {abcd, "a", 0, nil},
-	{abcd, "a", -1, []string{"", "bcd"}},
-	{abcd, "z", -1, []string{"abcd"}},
-	{commas, ",", -1, []string{"1", "2", "3", "4"}},
-	{dots, "...", -1, []string{"1", ".2", ".3", ".4"}},
-	{faces, "☹", -1, []string{"☺☻", ""}},
-	{faces, "~", -1, []string{faces}},
-	// {"1 2 3 4", " ", 3, []string{"1", "2", "3 4"}},
-	// {"1 2", " ", 3, []string{"1", "2"}},
-	// {"", "T", math.MaxInt / 4, []string{""}},
-	{"\xff-\xff", "", -1, []string{"\xff", "-", "\xff"}},
-	{"\xff-\xff", "-", -1, []string{"\xff", "\xff"}},
-}
-
-func eq(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := 0; i < len(a); i++ {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
-}
-
-func TestSplit(t *testing.T) {
-	for i, tt := range splittests {
-		a := split.String(tt.s, tt.sep).ToArray()
-		if !eq(a, tt.a) {
-			t.Errorf("%d: Split(%q, %q, %d) = %v; want %v", i, tt.s, tt.sep, tt.n, a, tt.a)
-			continue
-		}
-		if tt.n == 0 {
-			continue
-		}
-		s := strings.Join(a, tt.sep)
-		if s != tt.s {
-			t.Errorf("Join(Split(%q, %q, %d), %q) = %q", tt.s, tt.sep, tt.n, tt.sep, s)
+func TestStrings(t *testing.T) {
+	for _, sep := range testSeparators {
+		for _, s := range testStrings {
+			got := split.String(s, sep).ToArray() // this package
+			expected := strings.Split(s, sep)     // standard library
+			if !reflect.DeepEqual(got, expected) {
+				t.Fatalf("\nFor input %q, separator %q\nexpected: %q,\ngot:      %q", s, sep, expected, got)
+			}
 		}
 	}
 }
 
-func TestString(t *testing.T) {
-	var sep = ", "
-
-	input := "Hello, how a,re, you "
-	split := split.String(input, sep)
-
-	var got []string
-	for split.Next() {
-		got = append(got, split.Value())
-	}
-
-	expected := strings.Split(input, sep)
-
-	if !reflect.DeepEqual(got, expected) {
-		t.Fatalf("\nexpected: %v,\ngot:      %v", expected, got)
-	}
-}
-
-func TestStringOnAnyChar(t *testing.T) {
+func TestStringAny(t *testing.T) {
 	var sep = ", "
 
 	input := "Hello, how a,re, you "

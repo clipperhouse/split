@@ -39,43 +39,21 @@ func BenchmarkBytesSplit(b *testing.B) {
 	}
 }
 
-func TestBytesEmpty(t *testing.T) {
-	sep := []byte{}
-
-	input := []byte("Hello, how a,re, you 👍 ")
-	split := split.Bytes(input, sep)
-
-	var got [][]byte
-	for split.Next() {
-		got = append(got, split.Value())
-	}
-
-	expected := bytes.Split(input, sep)
-
-	if !reflect.DeepEqual(got, expected) {
-		t.Fatalf("\nexpected: %v,\ngot:      %v", expected, got)
-	}
-}
-
 func TestBytes(t *testing.T) {
-	sep := []byte(", ")
-
-	input := []byte("Hello, how a,re, you ")
-	split := split.Bytes(input, sep)
-
-	var got [][]byte
-	for split.Next() {
-		got = append(got, split.Value())
-	}
-
-	expected := bytes.Split(input, sep)
-
-	if !reflect.DeepEqual(got, expected) {
-		t.Fatalf("\nexpected: %v,\ngot:      %v", expected, got)
+	for _, sep := range testSeparators {
+		sepb := []byte(sep)
+		for _, s := range testStrings {
+			b := []byte(s)
+			got := split.Bytes(b, sepb).ToArray() // this package
+			expected := bytes.Split(b, sepb)      // standard library
+			if !reflect.DeepEqual(got, expected) {
+				t.Fatalf("\nexpected: %v,\ngot:      %v", expected, got)
+			}
+		}
 	}
 }
 
-func TestBytesOnAny(t *testing.T) {
+func TestBytesAny(t *testing.T) {
 	seps := []byte(", ")
 
 	input := []byte("Hello, how a,re, you ")
