@@ -25,11 +25,11 @@ func Bytes(s []byte, sep []byte) *ByteIterator {
 	return split(s, sep, byteFuncs)
 }
 
-// BytesAny slices s into all subslices separated by any bytes in sep.
+// BytesAny slices s into all subslices separated by any bytes in separators.
 //
-// If s does not contain sep and sep is not empty, BytesAny returns a slice of length 1 whose only element is s.
+// If s does not contain separators and separators is not empty, BytesAny returns a slice of length 1 whose only element is s.
 //
-// If sep is empty, BytesAny splits after each UTF-8 sequence. If both s and sep are empty, BytesAny returns an empty slice.
+// If separators is empty, BytesAny splits after each UTF-8 sequence. If both s and separators are empty, BytesAny returns an empty slice.
 //
 // BytesAny returns an iterator over subslices. Use [Iterator.Next] to loop, and [Iterator.Value] to get the current subslice.
 func BytesAny(s []byte, separators []byte) *ByteIterator {

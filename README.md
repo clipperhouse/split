@@ -4,6 +4,8 @@ You might be interested if you are splitting strings or bytes on a hot path.
 
 ### Usage
 
+See [pkg.go.dev](https://pkg.go.dev/github.com/clipperhouse/split)
+
 ```bash
 go get https://github.com/clipperhouse/split
 ```
@@ -20,6 +22,7 @@ for split.Next() {
     fmt.Println(split.Value())
 }
 ```
+
 ### Performance
 
 Some initial benchmarks:
