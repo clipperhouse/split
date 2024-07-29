@@ -10,6 +10,15 @@ type seq interface {
 	~string | ~[]byte
 }
 
+type mode byte
+
+const (
+	done mode = iota
+	any
+	sequence
+	emptySeparator
+)
+
 type funcs[T seq] struct {
 	Index      func(s T, sep T) int
 	IndexByte  func(s T, c byte) int
@@ -20,7 +29,7 @@ type funcs[T seq] struct {
 func split[T seq](s T, sep T, funcs funcs[T]) *Iterator[T] {
 	var mode = sequence
 	if len(sep) == 0 {
-		mode = emptySequence
+		mode = emptySeparator
 	}
 
 	return &Iterator[T]{
@@ -34,7 +43,7 @@ func split[T seq](s T, sep T, funcs funcs[T]) *Iterator[T] {
 func splitAny[T seq](s T, separators T, funcs funcs[T]) *Iterator[T] {
 	var mode = any
 	if len(separators) == 0 {
-		mode = emptySequence
+		mode = emptySeparator
 	}
 
 	return &Iterator[T]{
@@ -50,7 +59,6 @@ func splitAny[T seq](s T, separators T, funcs funcs[T]) *Iterator[T] {
 type Iterator[T seq] struct {
 	funcs[T]
 	input      T
-	separator  byte
 	separators T
 	mode       mode
 	start, end int
@@ -73,14 +81,12 @@ func (it *Iterator[T]) Next() bool {
 	switch it.mode {
 	case done:
 		return false
-	case singleElement:
-		index = it.IndexByte(slice, it.separator)
 	case any:
 		index = it.IndexAny(slice, string(it.separators))
 	case sequence:
 		index = it.Index(slice, it.separators)
 		separatorLength = len(it.separators)
-	case emptySequence:
+	case emptySeparator:
 		_, index = it.DecodeRune(slice)
 		if index == 0 {
 			return false
