@@ -55,7 +55,7 @@ func splitAny[T seq](s T, separators T, funcs funcs[T]) *Iterator[T] {
 
 }
 
-// Iterator is an iterator over subslices of `[]byte` or `string`. See the `Next` and `Value` methods.
+// Iterator is an iterator over subslices of `[]byte` or `string`. See [Iterator.Next] and [Iterator.Value].
 type Iterator[T seq] struct {
 	funcs[T]
 	input      T
@@ -65,14 +65,14 @@ type Iterator[T seq] struct {
 	cursor     int
 }
 
-// Value retrieves the value of the current subslice.
+// Value retrieves the value of the current subslice. Use it with [Iterator.Next].
 func (it *Iterator[T]) Value() T {
 	return it.input[it.start:it.end]
 }
 
 // Next tests whether there are any remaining subslices.
 //
-// Use a `for iterator.Next()` loop, and retrieve the current subslice with `iterator.Value()`.
+// Intended for use in a for loop. Inside the loop, retrieve the current subslice with [Iterator.Value].
 func (it *Iterator[T]) Next() bool {
 	var index int
 	var separatorLength = 1

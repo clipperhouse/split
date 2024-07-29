@@ -16,3 +16,14 @@ func ExampleString() {
 		fmt.Println(split.Value())
 	}
 }
+
+func ExampleBytes() {
+	text := []byte("Hello, 世界. Nice dog! 👍🐶")
+	sep := []byte(" ")
+
+	split := split.Bytes(text, sep)
+
+	for split.Next() {
+		fmt.Println(split.Value())
+	}
+}

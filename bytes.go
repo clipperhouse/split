@@ -14,22 +14,24 @@ var byteFuncs = funcs[[]byte]{
 	DecodeRune: utf8.DecodeRune,
 }
 
-// Bytes slices s into all substrings separated by sep and returns a slice of the substrings between those separators.
+// Bytes slices s into all subslices separated by sep.
 //
 // If s does not contain sep and sep is not empty, Bytes returns a slice of length 1 whose only element is s.
 //
 // If sep is empty, Bytes splits after each UTF-8 sequence. If both s and sep are empty, Bytes returns an empty slice.
 //
-// Bytes returns an iterator over subslices. Use `for iterator.Next()` to loop, and `iterator.Value()` to get the current subslice.
+// Bytes returns an iterator over subslices. Use [Iterator.Next] to loop, and [Iterator.Value] to get the current subslice.
 func Bytes(s []byte, sep []byte) *ByteIterator {
 	return split(s, sep, byteFuncs)
 }
 
-// BytesAny splits s into subslices separated by any of the bytes found in sep
-// and returns an iterator of the subslices between those separators.
-// If sep is empty, BytesAny splits after each UTF-8 sequence (rune).
+// BytesAny slices s into all subslices separated by any bytes in sep.
 //
-// Use `for ByteIterator.Next()` to loop, and `ByteIterator.Value()` to get the subslices.
+// If s does not contain sep and sep is not empty, BytesAny returns a slice of length 1 whose only element is s.
+//
+// If sep is empty, BytesAny splits after each UTF-8 sequence. If both s and sep are empty, BytesAny returns an empty slice.
+//
+// BytesAny returns an iterator over subslices. Use [Iterator.Next] to loop, and [Iterator.Value] to get the current subslice.
 func BytesAny(s []byte, separators []byte) *ByteIterator {
 	return splitAny(s, separators, byteFuncs)
 }
