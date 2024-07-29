@@ -1,21 +1,18 @@
 package split
 
-import (
-	"bytes"
-	"unicode/utf8"
-)
-
 // This Go implementation started with C# SpanSplitEnumerator<T>: https://github.com/dotnet/runtime/pull/104534
 
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // https://github.com/dotnet/runtime/blob/main/LICENSE.TXT
 
+type ByteIterator = iterator[[]byte]
+
 // Bytes splits s into subslices separated by sep and
 // returns an iterator of the subslices between those separators.
 // If sep is empty, Bytes splits after each UTF-8 sequence (rune).
 //
-// Use `for ByteIterator.Next()` to loop, and `ByteIterator.Value()` to get the subslices.
+// Use `for iterator.Next()` to loop, and `iterator.Value()` to get the subslices.
 func Bytes(s []byte, sep []byte) *ByteIterator {
 	var mode = sequence
 	if len(s) == 0 || len(sep) == 0 {
@@ -23,15 +20,17 @@ func Bytes(s []byte, sep []byte) *ByteIterator {
 	}
 
 	return &ByteIterator{
+		funcs:      byteFuncs,
 		input:      s,
 		separators: sep,
 		mode:       mode,
 	}
 }
 
-func BytesOnByte(input []byte, separator byte) *ByteIterator {
+func BytesOnByte(s []byte, separator byte) *ByteIterator {
 	return &ByteIterator{
-		input:     input,
+		funcs:     byteFuncs,
+		input:     s,
 		separator: separator,
 		mode:      singleElement,
 	}
@@ -49,58 +48,9 @@ func BytesOnAny(s []byte, separators []byte) *ByteIterator {
 	}
 
 	return &ByteIterator{
+		funcs:      byteFuncs,
 		input:      s,
 		separators: separators,
 		mode:       mode,
 	}
-}
-
-type ByteIterator struct {
-	input      []byte
-	separator  byte
-	separators []byte
-	mode       mode
-	start, end int
-	cursor     int
-}
-
-func (it *ByteIterator) Value() []byte {
-	return it.input[it.start:it.end]
-}
-
-func (it *ByteIterator) Next() bool {
-	var index int
-	var separatorLength = 1
-	var slice = it.input[it.cursor:]
-
-	switch it.mode {
-	case none:
-		return false
-	case singleElement:
-		index = bytes.IndexByte(slice, it.separator)
-	case any:
-		index = bytes.IndexAny(slice, string(it.separators))
-	case sequence:
-		index = bytes.Index(slice, it.separators)
-		separatorLength = len(it.separators)
-	case emptySequence:
-		_, index = utf8.DecodeRune(slice)
-		if index == 0 {
-			return false
-		}
-		separatorLength = 0
-	}
-
-	it.start = it.cursor
-
-	if index >= 0 {
-		it.end = it.start + index
-		it.cursor = it.end + separatorLength
-	} else {
-		it.cursor = len(it.input)
-		it.end = len(it.input)
-		it.mode = none
-	}
-
-	return true
 }
