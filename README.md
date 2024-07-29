@@ -49,7 +49,7 @@ If you do not actually need the array, but only need to iterate over the splits,
 
 ### Data types
 
-This packages handles `string` and `[]byte` (and named types based on them). If you have an `io.Reader`, we suggest [`bufio.Scanner`](https://pkg.go.dev/bufio) from the standard library.
+This packages handles `string` and `[]byte`. If you have an `io.Reader`, we suggest [`bufio.Scanner`](https://pkg.go.dev/bufio) from the standard library.
 
 ### Testing
 
