@@ -5,13 +5,7 @@ import (
 	"unicode/utf8"
 )
 
-// This Go implementation started with C# SpanSplitEnumerator<T>: https://github.com/dotnet/runtime/pull/104534
-
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// https://github.com/dotnet/runtime/blob/main/LICENSE.TXT
-
-type ByteIterator = iterator[[]byte]
+type ByteIterator = Iterator[[]byte]
 
 var byteFuncs = funcs[[]byte]{
 	Index:      bytes.Index,
@@ -20,11 +14,13 @@ var byteFuncs = funcs[[]byte]{
 	DecodeRune: utf8.DecodeRune,
 }
 
-// Bytes splits s into subslices separated by sep and
-// returns an iterator of the subslices between those separators.
-// If sep is empty, Bytes splits after each UTF-8 sequence (rune).
+// Bytes slices s into all substrings separated by sep and returns a slice of the substrings between those separators.
 //
-// Use `for iterator.Next()` to loop, and `iterator.Value()` to get the subslices.
+// If s does not contain sep and sep is not empty, Bytes returns a slice of length 1 whose only element is s.
+//
+// If sep is empty, Bytes splits after each UTF-8 sequence. If both s and sep are empty, Bytes returns an empty slice.
+//
+// Bytes returns an iterator over subslices. Use `for iterator.Next()` to loop, and `iterator.Value()` to get the current subslice.
 func Bytes(s []byte, sep []byte) *ByteIterator {
 	return split(s, sep, byteFuncs)
 }

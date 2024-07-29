@@ -5,13 +5,7 @@ import (
 	"unicode/utf8"
 )
 
-// This Go implementation started with C# SpanSplitEnumerator<T>: https://github.com/dotnet/runtime/pull/104534
-
-// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
-// https://github.com/dotnet/runtime/blob/main/LICENSE.TXT
-
-type StringIterator = iterator[string]
+type StringIterator = Iterator[string]
 
 var stringFuncs = funcs[string]{
 	Index:      strings.Index,
@@ -20,6 +14,13 @@ var stringFuncs = funcs[string]{
 	DecodeRune: utf8.DecodeRuneInString,
 }
 
+// String slices s into all substrings separated by sep and returns a slice of the substrings between those separators.
+//
+// If s does not contain sep and sep is not empty, String returns a slice of length 1 whose only element is s.
+//
+// If sep is empty, String splits after each UTF-8 sequence. If both s and sep are empty, String returns an empty slice.
+//
+// String returns an iterator over substrings. Use `for iterator.Next()` to loop, and `iterator.Value()` to get the current substring.
 func String(s string, separator string) *StringIterator {
 	return split(s, separator, stringFuncs)
 }

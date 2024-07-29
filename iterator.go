@@ -1,23 +1,29 @@
+// This Go implementation started with C# SpanSplitEnumerator<T>: https://github.com/dotnet/runtime/pull/104534
+
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// https://github.com/dotnet/runtime/blob/main/LICENSE.TXT
+
 package split
 
-type ByteSeq interface {
+type seq interface {
 	~string | ~[]byte
 }
 
-type funcs[T ByteSeq] struct {
+type funcs[T seq] struct {
 	Index      func(s T, sep T) int
 	IndexByte  func(s T, c byte) int
 	IndexAny   func(s T, chars string) int
 	DecodeRune func(p T) (r rune, size int)
 }
 
-func split[T ByteSeq](s T, sep T, funcs funcs[T]) *iterator[T] {
+func split[T seq](s T, sep T, funcs funcs[T]) *Iterator[T] {
 	var mode = sequence
 	if len(sep) == 0 {
 		mode = emptySequence
 	}
 
-	return &iterator[T]{
+	return &Iterator[T]{
 		funcs:      funcs,
 		input:      s,
 		separators: sep,
@@ -25,13 +31,13 @@ func split[T ByteSeq](s T, sep T, funcs funcs[T]) *iterator[T] {
 	}
 }
 
-func splitAny[T ByteSeq](s T, separators T, funcs funcs[T]) *iterator[T] {
+func splitAny[T seq](s T, separators T, funcs funcs[T]) *Iterator[T] {
 	var mode = any
 	if len(separators) == 0 {
 		mode = emptySequence
 	}
 
-	return &iterator[T]{
+	return &Iterator[T]{
 		funcs:      funcs,
 		input:      s,
 		separators: separators,
@@ -40,7 +46,8 @@ func splitAny[T ByteSeq](s T, separators T, funcs funcs[T]) *iterator[T] {
 
 }
 
-type iterator[T ByteSeq] struct {
+// Iterator is an iterator over subslices of `[]byte` or `string`. See the `Next` and `Value` methods.
+type Iterator[T seq] struct {
 	funcs[T]
 	input      T
 	separator  byte
@@ -50,11 +57,15 @@ type iterator[T ByteSeq] struct {
 	cursor     int
 }
 
-func (it *iterator[T]) Value() T {
+// Value retrieves the value of the current subslice.
+func (it *Iterator[T]) Value() T {
 	return it.input[it.start:it.end]
 }
 
-func (it *iterator[T]) Next() bool {
+// Next tests whether there are any remaining subslices.
+//
+// Use a `for iterator.Next()` loop, and retrieve the current subslice with `iterator.Value()`.
+func (it *Iterator[T]) Next() bool {
 	var index int
 	var separatorLength = 1
 	var slice = it.input[it.cursor:]
@@ -95,7 +106,7 @@ func (it *iterator[T]) Next() bool {
 //
 // This is a convenience method, and the result should identical to strings|bytes.Split from the standard library.
 // You should just use strings|bytes.Split if your goal is an array of results.
-func (it *iterator[T]) ToArray() []T {
+func (it *Iterator[T]) ToArray() []T {
 	var result []T = make([]T, 0, len(it.input)/4)
 
 	for it.Next() {
