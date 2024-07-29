@@ -18,7 +18,7 @@ import (
 // Use `for ByteIterator.Next()` to loop, and `ByteIterator.Value()` to get the subslices.
 func Bytes(s []byte, sep []byte) *ByteIterator {
 	var mode = sequence
-	if len(sep) == 0 {
+	if len(s) == 0 || len(sep) == 0 {
 		mode = emptySequence
 	}
 
@@ -42,14 +42,14 @@ func BytesOnByte(input []byte, separator byte) *ByteIterator {
 // If sep is empty, BytesOnAny splits after each UTF-8 sequence (rune).
 //
 // Use `for ByteIterator.Next()` to loop, and `ByteIterator.Value()` to get the subslices.
-func BytesOnAny(input []byte, separators []byte) *ByteIterator {
+func BytesOnAny(s []byte, separators []byte) *ByteIterator {
 	var mode = any
-	if len(separators) == 0 {
+	if len(s) == 0 || len(separators) == 0 {
 		mode = emptySequence
 	}
 
 	return &ByteIterator{
-		input:      input,
+		input:      s,
 		separators: separators,
 		mode:       mode,
 	}
@@ -64,25 +64,25 @@ type ByteIterator struct {
 	cursor     int
 }
 
-func (en *ByteIterator) Value() []byte {
-	return en.input[en.start:en.end]
+func (it *ByteIterator) Value() []byte {
+	return it.input[it.start:it.end]
 }
 
-func (en *ByteIterator) Next() bool {
+func (it *ByteIterator) Next() bool {
 	var index int
 	var separatorLength = 1
-	var slice = en.input[en.cursor:]
+	var slice = it.input[it.cursor:]
 
-	switch en.mode {
+	switch it.mode {
 	case none:
 		return false
 	case singleElement:
-		index = bytes.IndexByte(slice, en.separator)
+		index = bytes.IndexByte(slice, it.separator)
 	case any:
-		index = bytes.IndexAny(slice, string(en.separators))
+		index = bytes.IndexAny(slice, string(it.separators))
 	case sequence:
-		index = bytes.Index(slice, en.separators)
-		separatorLength = len(en.separators)
+		index = bytes.Index(slice, it.separators)
+		separatorLength = len(it.separators)
 	case emptySequence:
 		_, index = utf8.DecodeRune(slice)
 		if index == 0 {
@@ -91,15 +91,15 @@ func (en *ByteIterator) Next() bool {
 		separatorLength = 0
 	}
 
-	en.start = en.cursor
+	it.start = it.cursor
 
 	if index >= 0 {
-		en.end = en.start + index
-		en.cursor = en.end + separatorLength
+		it.end = it.start + index
+		it.cursor = it.end + separatorLength
 	} else {
-		en.cursor = len(en.input)
-		en.end = len(en.input)
-		en.mode = none
+		it.cursor = len(it.input)
+		it.end = len(it.input)
+		it.mode = none
 	}
 
 	return true

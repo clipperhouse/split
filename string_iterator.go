@@ -1,6 +1,9 @@
 package split
 
-import "strings"
+import (
+	"strings"
+	"unicode/utf8"
+)
 
 // This Go implementation started with C# SpanSplitEnumerator<T>: https://github.com/dotnet/runtime/pull/104534
 
@@ -17,18 +20,26 @@ func StringOnByte(input string, separator byte) *StringIterator {
 }
 
 func String(input string, separator string) *StringIterator {
+	var mode = sequence
+	if len(input) == 0 || len(separator) == 0 {
+		mode = emptySequence
+	}
 	return &StringIterator{
 		input:      input,
 		separators: separator,
-		mode:       sequence,
+		mode:       mode,
 	}
 }
 
 func StringOnAnyChar(input string, chars string) *StringIterator {
+	var mode = any
+	if len(input) == 0 || len(chars) == 0 {
+		mode = emptySequence
+	}
 	return &StringIterator{
 		input:      input,
 		separators: chars,
-		mode:       any,
+		mode:       mode,
 	}
 }
 
@@ -41,40 +52,54 @@ type StringIterator struct {
 	cursor     int
 }
 
-func (en *StringIterator) Value() string {
-	return en.input[en.start:en.end]
+func (it *StringIterator) Value() string {
+	return it.input[it.start:it.end]
 }
 
-func (en *StringIterator) Next() bool {
+func (it *StringIterator) Next() bool {
 	var index int
 	var separatorLength = 1
-	var slice = en.input[en.cursor:]
+	var slice = it.input[it.cursor:]
 
-	switch en.mode {
+	switch it.mode {
 	case none:
 		return false
 
 	case singleElement:
-		index = strings.IndexByte(slice, en.separator)
+		index = strings.IndexByte(slice, it.separator)
 	case any:
-		index = strings.IndexAny(slice, en.separators)
+		index = strings.IndexAny(slice, it.separators)
 	case sequence:
-		index = strings.Index(slice, en.separators)
-		separatorLength = len(en.separators)
+		index = strings.Index(slice, it.separators)
+		separatorLength = len(it.separators)
 	case emptySequence:
-		index = -1
+		_, index = utf8.DecodeRuneInString(slice)
+		if index == 0 {
+			return false
+		}
+		separatorLength = 0
 	}
 
-	en.start = en.cursor
+	it.start = it.cursor
 
 	if index >= 0 {
-		en.end = en.start + index
-		en.cursor = en.end + separatorLength
+		it.end = it.start + index
+		it.cursor = it.end + separatorLength
 	} else {
-		en.cursor = len(en.input)
-		en.end = len(en.input)
-		en.mode = none
+		it.cursor = len(it.input)
+		it.end = len(it.input)
+		it.mode = none
 	}
 
 	return true
+}
+
+func (it *StringIterator) ToArray() []string {
+	var result []string
+
+	for it.Next() {
+		result = append(result, it.Value())
+	}
+
+	return result
 }
