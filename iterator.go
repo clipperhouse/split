@@ -13,8 +13,7 @@ type seq interface {
 type mode byte
 
 const (
-	done mode = iota
-	any
+	any mode = iota
 	sequence
 	emptySeparator
 )
@@ -63,6 +62,7 @@ type Iterator[T seq] struct {
 	mode       mode
 	start, end int
 	cursor     int
+	done       bool
 }
 
 // Value retrieves the value of the current subslice. Use it with [Iterator.Next].
@@ -78,9 +78,11 @@ func (it *Iterator[T]) Next() bool {
 	var separatorLength = 1
 	var slice = it.input[it.cursor:]
 
-	switch it.mode {
-	case done:
+	if it.done {
 		return false
+	}
+
+	switch it.mode {
 	case any:
 		index = it.IndexAny(slice, string(it.separators))
 	case sequence:
@@ -102,7 +104,7 @@ func (it *Iterator[T]) Next() bool {
 	} else {
 		it.cursor = len(it.input)
 		it.end = len(it.input)
-		it.mode = done
+		it.done = true
 	}
 
 	return true
@@ -120,4 +122,12 @@ func (it *Iterator[T]) ToArray() []T {
 	}
 
 	return result
+}
+
+// Reset resets the iterator to the start of the string/bytes.
+func (it *Iterator[T]) Reset() {
+	it.cursor = 0
+	it.start = 0
+	it.end = 0
+	it.done = false
 }
