@@ -1,26 +1,39 @@
 package split_test
 
 import (
-	"reflect"
-	"testing"
-
-	"github.com/clipperhouse/split"
+	"crypto/rand"
 )
 
-func TestReset(t *testing.T) {
-	text := "Hello, how are you."
-	s1 := split.String(text, " ")
-	a1 := s1.ToArray()
-	a2 := s1.ToArray()
+var abcd = "abc𝚫"
+var emoji = "👍🐶"
+var efghi = "éfghi"
 
-	if reflect.DeepEqual(a1, a2) {
-		t.Fatal("They should not be equal, as s1 has not been reset")
-	}
+var testSeparators = []string{"", " ", ",", ", ", "🐶", "𝚫", "🌏👍", abcd, emoji, efghi}
 
-	s1.Reset()
-	a3 := s1.ToArray()
+var testStrings []string
 
-	if !reflect.DeepEqual(a1, a3) {
-		t.Fatal("They should be equal, as s1 has been reset")
+func init() {
+	testStrings = append(testStrings, "") // empty
+	testStrings = append(testStrings, abcd)
+	testStrings = append(testStrings, emoji)
+	testStrings = append(testStrings, efghi)
+
+	// Random string
+	b := make([]byte, 500)
+	rand.Read(b)
+	testStrings = append(testStrings, string(b))
+
+	// Random separator
+	b = make([]byte, 4)
+	rand.Read(b)
+	testSeparators = append(testSeparators, string(b))
+
+	for _, sep := range testSeparators {
+		testStrings = append(testStrings, sep)
+		center := abcd + sep + emoji + sep + efghi
+		testStrings = append(testStrings, center)
+		testStrings = append(testStrings, sep+center)     // leading
+		testStrings = append(testStrings, center+sep)     // trailing
+		testStrings = append(testStrings, sep+center+sep) // both
 	}
 }
