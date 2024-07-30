@@ -19,10 +19,9 @@ const (
 )
 
 type funcs[T seq] struct {
-	Index      func(s T, sep T) int
-	IndexByte  func(s T, c byte) int
-	IndexAny   func(s T, chars string) int
-	DecodeRune func(p T) (r rune, size int)
+	index      func(s T, sep T) int
+	indexAny   func(s T, chars string) int
+	decodeRune func(p T) (r rune, size int)
 }
 
 func split[T seq](s T, sep T, funcs funcs[T]) *Iterator[T] {
@@ -84,12 +83,12 @@ func (it *Iterator[T]) Next() bool {
 
 	switch it.mode {
 	case any:
-		index = it.IndexAny(slice, string(it.separators))
+		index = it.indexAny(slice, string(it.separators))
 	case sequence:
-		index = it.Index(slice, it.separators)
+		index = it.index(slice, it.separators)
 		separatorLength = len(it.separators)
 	case emptySeparator:
-		_, index = it.DecodeRune(slice)
+		_, index = it.decodeRune(slice)
 		if index == 0 {
 			return false
 		}

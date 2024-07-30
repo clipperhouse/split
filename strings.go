@@ -8,10 +8,9 @@ import (
 type StringIterator = Iterator[string]
 
 var stringFuncs = funcs[string]{
-	Index:      strings.Index,
-	IndexByte:  strings.IndexByte,
-	IndexAny:   strings.IndexAny,
-	DecodeRune: utf8.DecodeRuneInString,
+	index:      strings.Index,
+	indexAny:   strings.IndexAny,
+	decodeRune: utf8.DecodeRuneInString,
 }
 
 // String slices s into all substrings separated by sep.

@@ -8,10 +8,9 @@ import (
 type ByteIterator = Iterator[[]byte]
 
 var byteFuncs = funcs[[]byte]{
-	Index:      bytes.Index,
-	IndexByte:  bytes.IndexByte,
-	IndexAny:   bytes.IndexAny,
-	DecodeRune: utf8.DecodeRune,
+	index:      bytes.Index,
+	indexAny:   bytes.IndexAny,
+	decodeRune: utf8.DecodeRune,
 }
 
 // Bytes slices s into all subslices separated by sep.
